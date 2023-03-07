@@ -1,1 +1,104 @@
 
+
+import sys
+
+
+def add_student():
+    name = input("\nEnter student name: ")
+    while True:
+        try:
+            age = int(input("\nEnter student age: "))
+            break
+        except ValueError:
+            print("Invalid age. Please enter a valid integer.")
+    major = input("\nEnter student major: ")
+    return {"name": name, "age": age, "major": major}
+
+
+def write_student_details():
+    with open(file_name, "a") as f:
+        student = add_student()
+        f.write(f"\nStudent name: {student['name']}\nStudent age: {student['age']}\nStudent major: {student['major']}\n")
+        print("\nStudent data has been added successfully.\n")
+
+
+def read_student_data():
+    try:
+        with open(file_name, "r") as file:
+            print("\nStudent data:\n")
+            print(file.read())
+    except FileNotFoundError:
+        print("\nNo student data found. Please add data first.\n")
+
+
+def modify_student_data():
+    try:
+        with open(file_name, "r+") as file:
+            data = file.readlines()
+            print("\nCurrent student data:\n")
+            for line in data:
+                print(line.strip())
+            name = input("\nEnter the name of the student you want to modify: ")
+            for i, line in enumerate(data):
+                if line.strip() == f"Student name: {name}":
+                    student = add_student()
+                    data[i] = f"Student name: {student['name']}\nStudent age: {student['age']}\nStudent major: {student['major']}\n"
+                    file.seek(0)
+                    file.write("".join(data))
+                    file.truncate()
+                    print("\nStudent data has been modified successfully.\n")
+                    break
+            else:
+                print(f"\nNo student found with name {name}.\n")
+    except FileNotFoundError:
+        print("\nNo student data found. Please add data first.\n")
+
+
+def delete_student_data():
+    try:
+        with open(file_name, "r+") as file:
+            data = file.readlines()
+            print("\nCurrent student data:\n")
+            for line in data:
+                print(line.strip())
+            name = input("\nEnter the name of the student you want to delete: ")
+            for i, line in enumerate(data):
+                if line.strip() == f"Student name: {name}":
+                    del data[i:i+3]
+                    file.seek(0)
+                    file.write("".join(data))
+                    file.truncate()
+                    print("\nStudent data has been deleted successfully.\n")
+                    break
+            else:
+                print(f"\nNo student found with name {name}.\n")
+    except FileNotFoundError:
+        print("\nNo student data found. Please add data first.\n")
+
+
+file_name = "student.txt"
+while True:
+    print("\nWhat do you want to do?\n")
+    print("1. Add student data")
+    print("2. Read student data")
+    print("3. Modify student data")
+    print("4. Delete student data")
+    print("5. Exit")
+    try:
+        choice = int(input("\nEnter your choice here: "))
+        if choice == 1:
+            write_student_details()
+        elif choice == 2:
+            read_student_data()
+        elif choice == 3:
+            modify_student_data()
+        elif choice == 4:
+            delete_student_data()
+        elif choice == 5:
+            sys.exit()
+        else:
+            print("\nInvalid choice. Please enter a valid choice.\n")
+    except ValueError:
+        print("\nEnter valid choice")
+       
+
