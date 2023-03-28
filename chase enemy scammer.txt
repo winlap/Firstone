@@ -1,0 +1,117 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the game window
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption('Enemy Chase Game')
+
+# Load images
+player_img = pygame.image.load('documents/player.png').convert_alpha()
+player_img = pygame.transform.scale(player_img, (50, 50))  # Decrease size
+enemy_img = pygame.image.load('documents/enemy.png').convert_alpha()
+enemy_img = pygame.transform.scale(enemy_img, (30, 30))  # Decrease size
+
+# Set up player
+player_x = WINDOW_WIDTH // 2
+player_y = WINDOW_HEIGHT // 2
+player_speed = 5
+player_health = 100
+
+# Set up enemy
+enemy_x = random.randint(0, WINDOW_WIDTH)
+enemy_y = random.randint(0, WINDOW_HEIGHT)
+enemy_speed = 3
+enemy_health = 50
+
+# Set up barrier
+barrier_thickness = 10
+barrier_color = (0, 0, 255)
+barrier_rects = [
+    pygame.Rect(0, 0, WINDOW_WIDTH, barrier_thickness),  # Top
+    pygame.Rect(0, 0, barrier_thickness, WINDOW_HEIGHT),  # Left
+    pygame.Rect(WINDOW_WIDTH - barrier_thickness, 0, barrier_thickness, WINDOW_HEIGHT),  # Right
+    pygame.Rect(0, WINDOW_HEIGHT - barrier_thickness, WINDOW_WIDTH, barrier_thickness),  # Bottom
+]
+
+# Set up font
+font = pygame.font.SysFont(None, 30)
+
+# Set up clock
+clock = pygame.time.Clock()
+
+# Game loop
+running = True
+while running:
+    # Handle events
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Move player
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and player_x > barrier_thickness:
+        player_x -= player_speed
+    elif keys[pygame.K_RIGHT] and player_x < WINDOW_WIDTH - player_img.get_width() - barrier_thickness:
+        player_x += player_speed
+    if keys[pygame.K_UP] and player_y > barrier_thickness:
+        player_y -= player_speed
+    elif keys[pygame.K_DOWN] and player_y < WINDOW_HEIGHT - player_img.get_height() - barrier_thickness:
+        player_y += player_speed
+
+    # Move enemy
+    if enemy_x < player_x:
+        enemy_x += enemy_speed
+    elif enemy_x > player_x:
+        enemy_x -= enemy_speed
+    if enemy_y < player_y:
+        enemy_y += enemy_speed
+    elif enemy_y > player_y:
+        enemy_y -= enemy_speed
+
+    # Check for collisions
+    player_rect = pygame.Rect(player_x, player_y, player_img.get_width(), player_img.get_height())
+    enemy_rect = pygame.Rect(enemy_x, enemy_y, enemy_img.get_width(), enemy_img.get_height())
+    if player_rect.colliderect(enemy_rect):
+        player_health -= 10
+        enemy_health -= 10
+
+    # Draw game objects
+window.fill((255, 255, 255))  # White background
+pygame.draw.rect(window, barrier_color, barrier_rects)  # Barrier
+window.blit(player_img, (player_x, player_y))  # Player
+window.blit(enemy_img, (enemy_x, enemy_y))  # Enemy
+player_health_text = font.render(f'Player Health: {player_health}', True, (0, 0, 0))
+window.blit(player_health_text, (10, 30))  # Player health text
+enemy_health_text = font.render(f'Enemy Health: {enemy_health}', True, (0, 0, 0))
+window.blit(enemy_health_text, (WINDOW_WIDTH - enemy_health_text.get_width() - 10, 30))  # Enemy health text
+    # Draw health bars
+player_health_bar = pygame.Rect(10, 10, player_health, 10)
+pygame.draw.rect(window, (0, 255, 0), player_health_bar)
+enemy_health_bar = pygame.Rect(WINDOW_WIDTH - enemy_health - 10, 10, enemy_health, 10)
+pygame.draw.rect(window, (255, 0, 0), enemy_health_bar)
+
+    # Check for game over
+if player_health <= 0:
+        game_over_text = font.render('Game Over - You Lose!', True, (0, 0, 0))
+        game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        window.blit(game_over_text, game_over_rect)
+        running = False
+elif enemy_health <= 0:
+        game_over_text = font.render('Game Over - You Win!', True, (0, 0, 0))
+        game_over_rect = game_over_text.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        window.blit(game_over_text, game_over_rect)
+        running = False
+
+    # Update screen
+pygame.display.update()
+
+    # Tick the clock
+clock.tick(60)
+
+# Quit Pygame
+pygame.quit()
