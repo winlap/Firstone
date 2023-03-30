@@ -1,2 +1,2 @@
 # hblap
-place to overpower everything 
+this will help you learn the basic of python
